@@ -1,0 +1,5 @@
+<settings>
+   <setting id="minMouseSpeed" type="number" label="30101" default="1"/>
+   <setting id="maxMouseSpeed" type="number" label="30102" default="20"/>
+   <setting id="magnifierWidth" type="number" label="30103" default="800"/>
+</settings>

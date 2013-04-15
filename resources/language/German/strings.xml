@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+  <string id="30001">Website hinzufügen</string>
+  <string id="30002">Website entfernen</string>
+  <string id="30003">Titel</string>
+  <string id="30005">Tasten zuordnen</string>
+  <string id="30006">Website Eintellungen ändern</string>
+  <string id="30009">XBMC Wiedergabe stoppen?</string>
+  <string id="30010">Popups anzeigen?</string>
+  <string id="30101">Minimale Maus Geschwindigkeit</string>
+  <string id="30102">Maximale Maus Geschwindigkeit</string>
+  <string id="30103">Breite der Lupe</string>
+</strings>
