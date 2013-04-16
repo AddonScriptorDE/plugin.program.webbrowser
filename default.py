@@ -11,45 +11,46 @@ addonID = 'plugin.program.webbrowser'
 addon = xbmcaddon.Addon(id=addonID)
 translation = addon.getLocalizedString
 isWin = xbmc.getCondVisibility('system.platform.windows')
-userDataFolder=xbmc.translatePath("special://profile/addon_data/"+addonID)
-browserPath=xbmc.translatePath('special://home/addons/'+addonID+'/resources/XBMC_WebBrowser/XBMC_WebBrowser.exe')
-keyMapperPath=xbmc.translatePath('special://home/addons/'+addonID+'/resources/XBMC_WebBrowser/XBMC_WebBrowser_KeyMapper.exe')
-siteFolder=os.path.join(userDataFolder, 'sites')
-minMouseSpeed = addon.getSetting("minMouseSpeed")
-maxMouseSpeed = addon.getSetting("maxMouseSpeed")
+userDataFolder = xbmc.translatePath("special://profile/addon_data/"+addonID)
+browserPath = xbmc.translatePath('special://home/addons/'+addonID+'/resources/XBMC_WebBrowser/XBMC_WebBrowser.exe')
+keyMapperPath = xbmc.translatePath('special://home/addons/'+addonID+'/resources/XBMC_WebBrowser/XBMC_WebBrowser_KeyMapper.exe')
+siteFolder = os.path.join(userDataFolder, 'sites')
+minMouseSpeed = addon.getSetting("minimumMouseSpeed")
+maxMouseSpeed = addon.getSetting("maximumMouseSpeed")
 magnifierWidth = addon.getSetting("magnifierWidth")
 
 if not os.path.isdir(userDataFolder):
-  os.mkdir(userDataFolder)
+    os.mkdir(userDataFolder)
 if not os.path.isdir(siteFolder):
-  os.mkdir(siteFolder)
+    os.mkdir(siteFolder)
+
 
 def index():
-    files=os.listdir(siteFolder)
+    files = os.listdir(siteFolder)
     for file in files:
-      fh=open(os.path.join(siteFolder, file), 'r')
-      title=""
-      url=""
-      thumb=""
-      zoom=""
-      stopPlayback="yes"
-      showPopups="no"
-      for line in fh.readlines():
-        spl = line.split("=")
-        if spl[0]=="title":
-          title=spl[1].strip()
-        elif spl[0]=="url":
-          url=spl[1].strip()
-        elif spl[0]=="thumb":
-          thumb=spl[1].strip()
-        elif spl[0]=="zoom":
-          zoom=spl[1].strip()
-        elif spl[0]=="stopPlayback":
-          stopPlayback=spl[1].strip()
-        elif spl[0]=="showPopups":
-          showPopups=spl[1].strip()
-      fh.close()
-      addSiteDir(title, url, 'showSite', thumb, zoom, stopPlayback, showPopups)
+        fh = open(os.path.join(siteFolder, file), 'r')
+        title = ""
+        url = ""
+        thumb = ""
+        zoom = ""
+        stopPlayback = "yes"
+        showPopups = "no"
+        for line in fh.readlines():
+            spl = line.split("=")
+            if spl[0] == "title":
+                title = spl[1].strip()
+            elif spl[0] == "url":
+                url = spl[1].strip()
+            elif spl[0] == "thumb":
+                thumb = spl[1].strip()
+            elif spl[0] == "zoom":
+                zoom = spl[1].strip()
+            elif spl[0] == "stopPlayback":
+                stopPlayback = spl[1].strip()
+            elif spl[0] == "showPopups":
+                showPopups = spl[1].strip()
+        fh.close()
+        addSiteDir(title, url, 'showSite', thumb, zoom, stopPlayback, showPopups)
     addDir("- "+translation(30001), "", 'addSite', "")
     addDir("- "+translation(30005), "", 'mapKeys', "")
     xbmcplugin.endOfDirectory(pluginhandle)
@@ -59,25 +60,25 @@ def addSite():
     keyboard = xbmc.Keyboard('', translation(30003))
     keyboard.doModal()
     if keyboard.isConfirmed() and keyboard.getText():
-      title=keyboard.getText()
-      keyboard = xbmc.Keyboard('http://', translation(30004))
-      keyboard.doModal()
-      if keyboard.isConfirmed() and keyboard.getText():
-        url=keyboard.getText()
-        content = "title="+title+"\nurl="+url+"\nthumb=DefaultFolder.png\nzoom=100\nstopPlayback=yes\nshowPopups=no"
-        fh=open(os.path.join(siteFolder, title+".link"), 'w')
-        fh.write(content)
-        fh.close()
+        title = keyboard.getText()
+        keyboard = xbmc.Keyboard('http://', translation(30004))
+        keyboard.doModal()
+        if keyboard.isConfirmed() and keyboard.getText():
+            url = keyboard.getText()
+            content = "title="+title+"\nurl="+url+"\nthumb=DefaultFolder.png\nzoom=100\nstopPlayback=yes\nshowPopups=no"
+            fh = open(os.path.join(siteFolder, title+".link"), 'w')
+            fh.write(content)
+            fh.close()
     xbmc.executebuiltin("Container.Refresh")
 
 
 def showSite(url, zoom, stopPlayback, showPopups):
     if isWin:
-      subprocess.Popen(browserPath+' "'+userDataFolder+'" '+urllib.quote_plus(url)+' '+zoom+' '+showPopups+' '+minMouseSpeed+' '+maxMouseSpeed+' '+magnifierWidth, shell=False)
+        subprocess.Popen(browserPath+' "'+userDataFolder+'" '+urllib.quote_plus(url)+' '+zoom+' '+showPopups+' '+minMouseSpeed+' '+maxMouseSpeed+' '+magnifierWidth, shell=False)
     else:
-      subprocess.Popen("wine "+browserPath+' "'+userDataFolder+'" '+urllib.quote_plus(url)+' '+zoom+' '+showPopups+' '+minMouseSpeed+' '+maxMouseSpeed+' '+magnifierWidth, shell=True)
+        subprocess.Popen("wine "+browserPath+' "'+userDataFolder+'" '+urllib.quote_plus(url)+' '+zoom+' '+showPopups+' '+minMouseSpeed+' '+maxMouseSpeed+' '+magnifierWidth, shell=True)
     if stopPlayback == "yes":
-      xbmc.Player().stop()
+        xbmc.Player().stop()
 
 
 def removeSite(title):
@@ -86,62 +87,63 @@ def removeSite(title):
 
 
 def editSite(title):
-    file=os.path.join(siteFolder, title+".link")
-    fh=open(file, 'r')
-    title=""
-    url=""
-    thumb="DefaultFolder.png"
-    zoom="100"
-    stopPlayback="yes"
-    showPopups="no"
+    file = os.path.join(siteFolder, title+".link")
+    fh = open(file, 'r')
+    title = ""
+    url = ""
+    thumb = "DefaultFolder.png"
+    zoom = "100"
+    stopPlayback = "yes"
+    showPopups = "no"
     for line in fh.readlines():
         spl = line.split("=")
-        if spl[0]=="title":
-          title=spl[1].strip()
-        elif spl[0]=="url":
-          url=spl[1].strip()
-        elif spl[0]=="thumb":
-          thumb=spl[1].strip()
-        elif spl[0]=="zoom":
-          zoom=spl[1].strip()
-        elif spl[0]=="stopPlayback":
-          stopPlayback=spl[1].strip()
-        elif spl[0]=="showPopups":
-          showPopups=spl[1].strip()
+        if spl[0] == "title":
+            title = spl[1].strip()
+        elif spl[0] == "url":
+            url = spl[1].strip()
+        elif spl[0] == "thumb":
+            thumb = spl[1].strip()
+        elif spl[0] == "zoom":
+            zoom = spl[1].strip()
+        elif spl[0] == "stopPlayback":
+            stopPlayback = spl[1].strip()
+        elif spl[0] == "showPopups":
+            showPopups = spl[1].strip()
     fh.close()
-    
+
     keyboard = xbmc.Keyboard(title, translation(30003))
     keyboard.doModal()
     if keyboard.isConfirmed() and keyboard.getText():
-      title=keyboard.getText()
-      keyboard = xbmc.Keyboard(url, translation(30004))
-      keyboard.doModal()
-      if keyboard.isConfirmed() and keyboard.getText():
-        url=keyboard.getText()
-        keyboard = xbmc.Keyboard(zoom, translation(30008))
+        title = keyboard.getText()
+        keyboard = xbmc.Keyboard(url, translation(30004))
         keyboard.doModal()
         if keyboard.isConfirmed() and keyboard.getText():
-          zoom=keyboard.getText()
-          keyboard = xbmc.Keyboard(stopPlayback, translation(30009))
-          keyboard.doModal()
-          if keyboard.isConfirmed() and keyboard.getText():
-            stopPlayback=keyboard.getText()
-            keyboard = xbmc.Keyboard(showPopups, translation(30010))
+            url = keyboard.getText()
+            keyboard = xbmc.Keyboard(zoom, translation(30008))
             keyboard.doModal()
             if keyboard.isConfirmed() and keyboard.getText():
-              showPopups=keyboard.getText()
-              content = "title="+title+"\nurl="+url+"\nthumb="+thumb+"\nzoom="+zoom+"\nstopPlayback="+stopPlayback+"\nshowPopups="+showPopups
-              fh=open(os.path.join(siteFolder, title+".link"), 'w')
-              fh.write(content)
-              fh.close()
+                zoom = keyboard.getText()
+                keyboard = xbmc.Keyboard(stopPlayback, translation(30009))
+                keyboard.doModal()
+                if keyboard.isConfirmed() and keyboard.getText():
+                    stopPlayback = keyboard.getText()
+                    keyboard = xbmc.Keyboard(showPopups, translation(30010))
+                    keyboard.doModal()
+                    if keyboard.isConfirmed() and keyboard.getText():
+                        showPopups = keyboard.getText()
+                        content = "title="+title+"\nurl="+url+"\nthumb="+thumb+"\nzoom="+zoom+"\nstopPlayback="+stopPlayback+"\nshowPopups="+showPopups
+                        fh = open(os.path.join(siteFolder, title+".link"), 'w')
+                        fh.write(content)
+                        fh.close()
     xbmc.executebuiltin("Container.Refresh")
 
 
 def mapKeys():
     if isWin:
-      subprocess.Popen(keyMapperPath+' "'+userDataFolder+'"', shell=False)
+        subprocess.Popen(keyMapperPath+' "'+userDataFolder+'"', shell=False)
     else:
-      subprocess.Popen("wine "+keyMapperPath+' "'+userDataFolder+'"', shell=True)
+        subprocess.Popen("wine "+keyMapperPath+' "'+userDataFolder+'"', shell=True)
+
 
 def parameters_string_to_dict(parameters):
     paramDict = {}
