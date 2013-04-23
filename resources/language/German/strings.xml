@@ -9,5 +9,7 @@
   <string id="30010">Popups anzeigen?</string>
   <string id="30101">Minimale Maus Geschwindigkeit</string>
   <string id="30102">Maximale Maus Geschwindigkeit</string>
-  <string id="30103">Breite der Lupe</string>
+  <string id="30103">Größe der Lupe</string>
+  <string id="30104">Alternativen Cursor nutzen</string>
+  <string id="30105">Cursor Größe</string>
 </strings>

@@ -1,2 +1,14 @@
 1.0.0
 - Initial release
+1.0.2
+- Added custom mouse cursor
+- Added website shortcuts
+- Added access to favourites via Browser
+- Improved virtual keyboard
+- Improved magnifier
+1.0.3
+- Changed default setting for "Use custom cursor" to false
+1.0.4
+- Fixed bug, that Xbmc is minimized after closing the browser (on some systems)
+1.0.5
+- Changed default custom cursor

@@ -15,9 +15,12 @@ userDataFolder = xbmc.translatePath("special://profile/addon_data/"+addonID)
 browserPath = xbmc.translatePath('special://home/addons/'+addonID+'/resources/XBMC_WebBrowser/XBMC_WebBrowser.exe')
 keyMapperPath = xbmc.translatePath('special://home/addons/'+addonID+'/resources/XBMC_WebBrowser/XBMC_WebBrowser_KeyMapper.exe')
 siteFolder = os.path.join(userDataFolder, 'sites')
+shortCutsFolder = os.path.join(userDataFolder, 'shortcuts')
 minMouseSpeed = addon.getSetting("minimumMouseSpeed")
 maxMouseSpeed = addon.getSetting("maximumMouseSpeed")
-magnifierWidth = addon.getSetting("magnifierWidth")
+useCustomCursor = addon.getSetting("useCustomCursor")
+customCursorSize = addon.getSetting("customCursorSize")
+magnifierSize = addon.getSetting("magnifierSize")
 
 if not os.path.isdir(userDataFolder):
     os.mkdir(userDataFolder)
@@ -28,29 +31,31 @@ if not os.path.isdir(siteFolder):
 def index():
     files = os.listdir(siteFolder)
     for file in files:
-        fh = open(os.path.join(siteFolder, file), 'r')
-        title = ""
-        url = ""
-        thumb = ""
-        zoom = ""
-        stopPlayback = "yes"
-        showPopups = "no"
-        for line in fh.readlines():
-            spl = line.split("=")
-            if spl[0] == "title":
-                title = spl[1].strip()
-            elif spl[0] == "url":
-                url = spl[1].strip()
-            elif spl[0] == "thumb":
-                thumb = spl[1].strip()
-            elif spl[0] == "zoom":
-                zoom = spl[1].strip()
-            elif spl[0] == "stopPlayback":
-                stopPlayback = spl[1].strip()
-            elif spl[0] == "showPopups":
-                showPopups = spl[1].strip()
-        fh.close()
-        addSiteDir(title, url, 'showSite', thumb, zoom, stopPlayback, showPopups)
+        if file.endswith(".link"):
+          fh = open(os.path.join(siteFolder, file), 'r')
+          title = ""
+          url = ""
+          thumb = ""
+          zoom = ""
+          stopPlayback = "yes"
+          showPopups = "no"
+          for line in fh.readlines():
+              entry = line[:line.find("=")]
+              content = line[line.find("=")+1:]
+              if entry == "title":
+                  title = content.strip()
+              elif entry == "url":
+                  url = content.strip()
+              elif entry == "thumb":
+                  thumb = content.strip()
+              elif entry == "zoom":
+                  zoom = content.strip()
+              elif entry == "stopPlayback":
+                  stopPlayback = content.strip()
+              elif entry == "showPopups":
+                  showPopups = content.strip()
+          fh.close()
+          addSiteDir(title, url, 'showSite', thumb, zoom, stopPlayback, showPopups)
     addDir("- "+translation(30001), "", 'addSite', "")
     addDir("- "+translation(30005), "", 'mapKeys', "")
     xbmcplugin.endOfDirectory(pluginhandle)
@@ -72,11 +77,12 @@ def addSite():
     xbmc.executebuiltin("Container.Refresh")
 
 
-def showSite(url, zoom, stopPlayback, showPopups):
+def showSite(url, title, zoom, stopPlayback, showPopups):
+    path = browserPath+' "'+userDataFolder+'" "'+title+'" '+urllib.quote_plus(url)+' '+zoom+' '+showPopups+' '+minMouseSpeed+' '+maxMouseSpeed+' '+magnifierSize+' '+useCustomCursor+' '+customCursorSize
     if isWin:
-        subprocess.Popen(browserPath+' "'+userDataFolder+'" '+urllib.quote_plus(url)+' '+zoom+' '+showPopups+' '+minMouseSpeed+' '+maxMouseSpeed+' '+magnifierWidth, shell=False)
+        subprocess.Popen(path, shell=False)
     else:
-        subprocess.Popen("wine "+browserPath+' "'+userDataFolder+'" '+urllib.quote_plus(url)+' '+zoom+' '+showPopups+' '+minMouseSpeed+' '+maxMouseSpeed+' '+magnifierWidth, shell=True)
+        subprocess.Popen("wine "+path, shell=True)
     if stopPlayback == "yes":
         xbmc.Player().stop()
 
@@ -96,21 +102,23 @@ def editSite(title):
     stopPlayback = "yes"
     showPopups = "no"
     for line in fh.readlines():
-        spl = line.split("=")
-        if spl[0] == "title":
-            title = spl[1].strip()
-        elif spl[0] == "url":
-            url = spl[1].strip()
-        elif spl[0] == "thumb":
-            thumb = spl[1].strip()
-        elif spl[0] == "zoom":
-            zoom = spl[1].strip()
-        elif spl[0] == "stopPlayback":
-            stopPlayback = spl[1].strip()
-        elif spl[0] == "showPopups":
-            showPopups = spl[1].strip()
+        entry = line[:line.find("=")]
+        content = line[line.find("=")+1:]
+        if entry == "title":
+            title = content.strip()
+        elif entry == "url":
+            url = content.strip()
+        elif entry == "thumb":
+            thumb = content.strip()
+        elif entry == "zoom":
+            zoom = content.strip()
+        elif entry == "stopPlayback":
+            stopPlayback = content.strip()
+        elif entry == "showPopups":
+            showPopups = content.strip()
     fh.close()
-
+    
+    oldTitle = title
     keyboard = xbmc.Keyboard(title, translation(30003))
     keyboard.doModal()
     if keyboard.isConfirmed() and keyboard.getText():
@@ -135,6 +143,12 @@ def editSite(title):
                         fh = open(os.path.join(siteFolder, title+".link"), 'w')
                         fh.write(content)
                         fh.close()
+                        file = os.path.join(shortCutsFolder, oldTitle+".links")
+                        fileNew = os.path.join(shortCutsFolder, title+".links")
+                        if title!=oldTitle:
+                          os.remove(os.path.join(siteFolder, oldTitle+".link"))
+                        if os.path.exists(file):
+                          os.rename(file, fileNew)
     xbmc.executebuiltin("Container.Refresh")
 
 
@@ -166,7 +180,7 @@ def addDir(name, url, mode, iconimage):
 
 
 def addSiteDir(name, url, mode, iconimage, zoom, stopPlayback, showPopups):
-    u = sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+urllib.quote_plus(mode)+"&zoom="+urllib.quote_plus(zoom)+"&stopPlayback="+urllib.quote_plus(stopPlayback)+"&showPopups="+urllib.quote_plus(showPopups)
+    u = sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+urllib.quote_plus(mode)+"&name="+urllib.quote_plus(name)+"&zoom="+urllib.quote_plus(zoom)+"&stopPlayback="+urllib.quote_plus(stopPlayback)+"&showPopups="+urllib.quote_plus(showPopups)
     ok = True
     liz = xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
     liz.setInfo(type="Video", infoLabels={"Title": name})
@@ -176,15 +190,16 @@ def addSiteDir(name, url, mode, iconimage, zoom, stopPlayback, showPopups):
 
 params = parameters_string_to_dict(sys.argv[2])
 mode = urllib.unquote_plus(params.get('mode', ''))
+name = urllib.unquote_plus(params.get('name', ''))
 url = urllib.unquote_plus(params.get('url', ''))
 zoom = urllib.unquote_plus(params.get('zoom', '100'))
-stopPlayback = urllib.unquote_plus(params.get('stopPlayback', 'yes'))
+stopPlayback = urllib.unquote_plus(params.get('stopPlayback', 'no'))
 showPopups = urllib.unquote_plus(params.get('showPopups', 'no'))
 
 if mode == 'addSite':
     addSite()
 elif mode == 'showSite':
-    showSite(url, zoom, stopPlayback, showPopups)
+    showSite(url, name, zoom, stopPlayback, showPopups)
 elif mode == 'removeSite':
     removeSite(url)
 elif mode == 'editSite':

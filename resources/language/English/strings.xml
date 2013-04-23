@@ -12,5 +12,7 @@
   <string id="30010">Show Popups?</string>
   <string id="30101">Minimum mouse speed</string>
   <string id="30102">Maximum mouse speed</string>
-  <string id="30103">Magnifier width</string>
+  <string id="30103">Magnifier size</string>
+  <string id="30104">Use alternative cursor</string>
+  <string id="30105">Cursor size</string>
 </strings>
