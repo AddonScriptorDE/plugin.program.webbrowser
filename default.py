@@ -78,7 +78,7 @@ def addSite():
 
 
 def showSite(url, title, zoom, stopPlayback, showPopups):
-    path = browserPath+' "'+userDataFolder+'" "'+title+'" '+urllib.quote_plus(url)+' '+zoom+' '+showPopups+' '+minMouseSpeed+' '+maxMouseSpeed+' '+magnifierSize+' '+useCustomCursor+' '+customCursorSize
+    path = browserPath+' "'+userDataFolder+'" "'+title+'" '+urllib.quote_plus(url)+' '+zoom+' '+showPopups+' '+minMouseSpeed+' '+maxMouseSpeed+' '+magnifierSize+' '+useCustomCursor+' '+customCursorSize+' ""'
     if isWin:
         subprocess.Popen(path, shell=False)
     else:
