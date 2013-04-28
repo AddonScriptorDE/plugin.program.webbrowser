@@ -16,3 +16,11 @@
 - Added support for watchever playback
 1.0.7
 - Some small changes
+1.0.8
+- Added Function Menu
+- Added toggle Mouse/Scroll function
+- Added showScrollbar website setting
+- Added scroll-speed addon setting
+- Improved magnifier (Zoom In/Out)
+- Some Usability improvements
+- Some small bugfixes

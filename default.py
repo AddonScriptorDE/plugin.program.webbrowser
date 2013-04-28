@@ -21,6 +21,7 @@ maxMouseSpeed = addon.getSetting("maximumMouseSpeed")
 useCustomCursor = addon.getSetting("useCustomCursor")
 customCursorSize = addon.getSetting("customCursorSize")
 magnifierSize = addon.getSetting("magnifierSize")
+scrollSpeed = addon.getSetting("scrollSpeed")
 
 if not os.path.isdir(userDataFolder):
     os.mkdir(userDataFolder)
@@ -39,6 +40,8 @@ def index():
           zoom = ""
           stopPlayback = "yes"
           showPopups = "no"
+          showScrollbar = "yes"
+          userAgent = ""
           for line in fh.readlines():
               entry = line[:line.find("=")]
               content = line[line.find("=")+1:]
@@ -54,8 +57,12 @@ def index():
                   stopPlayback = content.strip()
               elif entry == "showPopups":
                   showPopups = content.strip()
+              elif entry == "showScrollbar":
+                  showScrollbar = content.strip()
+              elif entry == "userAgent":
+                  userAgent = content.strip()
           fh.close()
-          addSiteDir(title, url, 'showSite', thumb, zoom, stopPlayback, showPopups)
+          addSiteDir(title, url, 'showSite', thumb, zoom, stopPlayback, showPopups, showScrollbar, userAgent)
     addDir("- "+translation(30001), "", 'addSite', "")
     addDir("- "+translation(30005), "", 'mapKeys', "")
     xbmcplugin.endOfDirectory(pluginhandle)
@@ -77,8 +84,8 @@ def addSite():
     xbmc.executebuiltin("Container.Refresh")
 
 
-def showSite(url, title, zoom, stopPlayback, showPopups):
-    path = browserPath+' "'+userDataFolder+'" "'+title+'" '+urllib.quote_plus(url)+' '+zoom+' '+showPopups+' '+minMouseSpeed+' '+maxMouseSpeed+' '+magnifierSize+' '+useCustomCursor+' '+customCursorSize+' ""'
+def showSite(url, title, zoom, stopPlayback, showPopups, showScrollbar, userAgent):
+    path = browserPath+' "'+userDataFolder+'" "'+title+'" '+urllib.quote_plus(url)+' '+zoom+' '+showPopups+' '+minMouseSpeed+' '+maxMouseSpeed+' '+magnifierSize+' '+useCustomCursor+' '+customCursorSize+' '+showScrollbar+' '+scrollSpeed+' "'+userAgent+'"'
     if isWin:
         subprocess.Popen(path, shell=False)
     else:
@@ -101,6 +108,8 @@ def editSite(title):
     zoom = "100"
     stopPlayback = "yes"
     showPopups = "no"
+    showScrollbar = "yes"
+    userAgent = ""
     for line in fh.readlines():
         entry = line[:line.find("=")]
         content = line[line.find("=")+1:]
@@ -116,6 +125,10 @@ def editSite(title):
             stopPlayback = content.strip()
         elif entry == "showPopups":
             showPopups = content.strip()
+        elif entry == "showScrollbar":
+            showScrollbar = content.strip()
+        elif entry == "userAgent":
+            userAgent = content.strip()
     fh.close()
     
     oldTitle = title
@@ -139,16 +152,23 @@ def editSite(title):
                     keyboard.doModal()
                     if keyboard.isConfirmed() and keyboard.getText():
                         showPopups = keyboard.getText()
-                        content = "title="+title+"\nurl="+url+"\nthumb="+thumb+"\nzoom="+zoom+"\nstopPlayback="+stopPlayback+"\nshowPopups="+showPopups
-                        fh = open(os.path.join(siteFolder, title+".link"), 'w')
-                        fh.write(content)
-                        fh.close()
-                        file = os.path.join(shortCutsFolder, oldTitle+".links")
-                        fileNew = os.path.join(shortCutsFolder, title+".links")
-                        if title!=oldTitle:
-                          os.remove(os.path.join(siteFolder, oldTitle+".link"))
-                        if os.path.exists(file):
-                          os.rename(file, fileNew)
+                        keyboard = xbmc.Keyboard(showScrollbar, translation(30011))
+                        keyboard.doModal()
+                        if keyboard.isConfirmed() and keyboard.getText():
+                            showScrollbar = keyboard.getText()
+                            if userAgent:
+                              content = "title="+title+"\nurl="+url+"\nthumb="+thumb+"\nzoom="+zoom+"\nstopPlayback="+stopPlayback+"\nshowPopups="+showPopups+"\nshowScrollbar="+showScrollbar+"\nuserAgent="+userAgent
+                            else:
+                              content = "title="+title+"\nurl="+url+"\nthumb="+thumb+"\nzoom="+zoom+"\nstopPlayback="+stopPlayback+"\nshowPopups="+showPopups+"\nshowScrollbar="+showScrollbar
+                            fh = open(os.path.join(siteFolder, title+".link"), 'w')
+                            fh.write(content)
+                            fh.close()
+                            file = os.path.join(shortCutsFolder, oldTitle+".links")
+                            fileNew = os.path.join(shortCutsFolder, title+".links")
+                            if title!=oldTitle:
+                              os.remove(os.path.join(siteFolder, oldTitle+".link"))
+                            if os.path.exists(file):
+                              os.rename(file, fileNew)
     xbmc.executebuiltin("Container.Refresh")
 
 
@@ -179,8 +199,8 @@ def addDir(name, url, mode, iconimage):
     return ok
 
 
-def addSiteDir(name, url, mode, iconimage, zoom, stopPlayback, showPopups):
-    u = sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+urllib.quote_plus(mode)+"&name="+urllib.quote_plus(name)+"&zoom="+urllib.quote_plus(zoom)+"&stopPlayback="+urllib.quote_plus(stopPlayback)+"&showPopups="+urllib.quote_plus(showPopups)
+def addSiteDir(name, url, mode, iconimage, zoom, stopPlayback, showPopups, showScrollbar, userAgent):
+    u = sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+urllib.quote_plus(mode)+"&name="+urllib.quote_plus(name)+"&zoom="+urllib.quote_plus(zoom)+"&stopPlayback="+urllib.quote_plus(stopPlayback)+"&showPopups="+urllib.quote_plus(showPopups)+"&showScrollbar="+urllib.quote_plus(showScrollbar)+"&userAgent="+urllib.quote_plus(userAgent)
     ok = True
     liz = xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
     liz.setInfo(type="Video", infoLabels={"Title": name})
@@ -195,11 +215,13 @@ url = urllib.unquote_plus(params.get('url', ''))
 zoom = urllib.unquote_plus(params.get('zoom', '100'))
 stopPlayback = urllib.unquote_plus(params.get('stopPlayback', 'no'))
 showPopups = urllib.unquote_plus(params.get('showPopups', 'no'))
+showScrollbar = urllib.unquote_plus(params.get('showScrollbar', 'yes'))
+userAgent = urllib.unquote_plus(params.get('userAgent', ''))
 
 if mode == 'addSite':
     addSite()
 elif mode == 'showSite':
-    showSite(url, name, zoom, stopPlayback, showPopups)
+    showSite(url, name, zoom, stopPlayback, showPopups, showScrollbar, userAgent)
 elif mode == 'removeSite':
     removeSite(url)
 elif mode == 'editSite':
